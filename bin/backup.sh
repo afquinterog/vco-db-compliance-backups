@@ -59,13 +59,15 @@ curl -o $BACKUP_FILE_NAME `heroku pg:backups:url --app $APP`
 
 FINAL_FILE_NAME=$BACKUP_FILE_NAME
 
-if [[ -z "$NOGZIP" ]]; then
-  gzip $BACKUP_FILE_NAME
-  FINAL_FILE_NAME=$BACKUP_FILE_NAME.gz
-fi
+#if [[ -z "$NOGZIP" ]]; then
+ # gzip $BACKUP_FILE_NAME
+ # FINAL_FILE_NAME=$BACKUP_FILE_NAME.gz
+#fi
 
+echo "-----> Compress backup .... "
+tar -czPf /tmp/backup.tgz $FINAL_FILE_NAME > /dev/null
 
-echo "-----> backing up to glacier ... "
+echo "-----> backing up to glacier .... "
 
 #/tmp/aws/bin/aws s3 cp $FINAL_FILE_NAME s3://$S3_BUCKET_PATH/$APP/$DATABASE/$FINAL_FILE_NAME --sse AES256
 
@@ -75,5 +77,5 @@ echo "-----> Archive description: $FINAL_FILE_NAME"
 /tmp/aws/bin/aws glacier upload-archive --archive-description $FINAL_FILE_NAME \
   --account-id -  \
   --vault-name $VCO_BACKUPS_VAULT_NAME \
-  --body FINAL_FILE_NAME 
+  --body /tmp/backup.tgz 
 
