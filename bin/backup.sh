@@ -29,53 +29,42 @@ if [[ -z "$VCO_BACKUPS_REGION" ]]; then
 fi
 
 
+if [ "$(date +%u)" = 1 ]; then 
+	#install aws-cli
+	curl https://s3.amazonaws.com/aws-cli/awscli-bundle.zip -o awscli-bundle.zip
+	unzip awscli-bundle.zip
+	chmod +x ./awscli-bundle/install
+	./awscli-bundle/install -i /tmp/aws
+
+	#set backup name
+	BACKUP_FILE_NAME="$(date +"%Y-%m-%d-%H-%M")-$APP-$DATABASE.dump"
+
+	#configure aws cli
+	/tmp/aws/bin/aws configure set aws_access_key_id $VCO_BACKUPS_ACCESS_KEY_ID
+	/tmp/aws/bin/aws configure set aws_secret_access_key $VCO_BACKUPS_SECRET_ACCESS_KEY
+	/tmp/aws/bin/aws configure set region $VCO_BACKUPS_REGION
 
 
-#Get environment variables
-#VCO_BACKUPS_ACCESS_KEY_ID=$(cat $ENV_DIR/VCO_BACKUPS_ACCESS_KEY_ID)
-#VCO_BACKUPS_SECRET_ACCESS_KEY=$(cat $ENV_DIR/VCO_BACKUPS_SECRET_ACCESS_KEY)
-#VCO_BACKUPS_REGION=$(cat $ENV_DIR/VCO_BACKUPS_REGION)
-#VCO_BACKUPS_VAULT_NAME=$(cat $ENV_DIR/VCO_BACKUPS_VAULT_NAME)
-#VCO_BACKUPS_APP_NAME=$(cat $ENV_DIR/VCO_BACKUPS_APP_NAME)
+	echo "-----> Generating backup ... "
+	heroku pg:backups capture $DATABASE --app $APP
+	curl -o $BACKUP_FILE_NAME `heroku pg:backups:url --app $APP`
 
-#install aws-cli
-curl https://s3.amazonaws.com/aws-cli/awscli-bundle.zip -o awscli-bundle.zip
-unzip awscli-bundle.zip
-chmod +x ./awscli-bundle/install
-./awscli-bundle/install -i /tmp/aws
-
-#set backup name
-BACKUP_FILE_NAME="$(date +"%Y-%m-%d-%H-%M")-$APP-$DATABASE.dump"
-
-#configure aws cli
-/tmp/aws/bin/aws configure set aws_access_key_id $VCO_BACKUPS_ACCESS_KEY_ID
-/tmp/aws/bin/aws configure set aws_secret_access_key $VCO_BACKUPS_SECRET_ACCESS_KEY
-/tmp/aws/bin/aws configure set region $VCO_BACKUPS_REGION
+	FINAL_FILE_NAME=$BACKUP_FILE_NAME
 
 
-echo "-----> Generating backup ... "
-heroku pg:backups capture $DATABASE --app $APP
-curl -o $BACKUP_FILE_NAME `heroku pg:backups:url --app $APP`
+	echo "-----> Compress backup .... "
+	tar -czPf /tmp/backup.tgz $FINAL_FILE_NAME > /dev/null
 
-FINAL_FILE_NAME=$BACKUP_FILE_NAME
+	echo "-----> backing up to glacier .... "
 
-#if [[ -z "$NOGZIP" ]]; then
- # gzip $BACKUP_FILE_NAME
- # FINAL_FILE_NAME=$BACKUP_FILE_NAME.gz
-#fi
+	#Save data on Glacier vault
+	echo "-----> Archive description: $FINAL_FILE_NAME" 
+	/tmp/aws/bin/aws glacier upload-archive --archive-description $FINAL_FILE_NAME \
+	  --account-id -  \
+	  --vault-name $VCO_BACKUPS_VAULT_NAME \
+	  --body /tmp/backup.tgz 
 
-echo "-----> Compress backup .... "
-tar -czPf /tmp/backup.tgz $FINAL_FILE_NAME > /dev/null
-
-echo "-----> backing up to glacier .... "
-
-#/tmp/aws/bin/aws s3 cp $FINAL_FILE_NAME s3://$S3_BUCKET_PATH/$APP/$DATABASE/$FINAL_FILE_NAME --sse AES256
+fi
 
 
-#Save data on Glacier vault
-echo "-----> Archive description: $FINAL_FILE_NAME" 
-/tmp/aws/bin/aws glacier upload-archive --archive-description $FINAL_FILE_NAME \
-  --account-id -  \
-  --vault-name $VCO_BACKUPS_VAULT_NAME \
-  --body /tmp/backup.tgz 
 
