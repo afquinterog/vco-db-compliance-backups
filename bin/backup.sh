@@ -64,6 +64,8 @@ if [ "$(date +%u)" = 1 ]; then
 	  --vault-name $VCO_BACKUPS_VAULT_NAME \
 	  --body /tmp/backup.tgz 
 
+else
+	echo "-----> Backups will run once a week .... "	
 fi
 
 
