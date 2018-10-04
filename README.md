@@ -1,4 +1,4 @@
-Simple heroku app with a bash script for capturing heroku database backups and copying to your s3 bucket.  Deploy this as a separate app within heroku and schedule the script to backup your production databases which exist within another heroku project.
+Simple heroku app with a bash script for capturing heroku database backups and copying to Aws Glacier.  Deploy this as a separate app within heroku and schedule the script to backup your production databases which exist within another heroku project.
 
 
 ## Installation
@@ -31,17 +31,12 @@ heroku config:add HEROKU_API_KEY=`heroku auth:token` -a my-database-backups
 Next we need to add the amazon key and secret.
 
 ```
-heroku config:add AWS_ACCESS_KEY_ID=123456 -a my-database-backups
-heroku config:add AWS_DEFAULT_REGION=us-east-1 -a my-database-backups
-heroku config:add AWS_SECRET_ACCESS_KEY=132345verybigsecret -a my-database-backups
-```
-
-And we'll need to also set the bucket and path where we would like to store our database backups:
+heroku config:add VCO_BACKUPS_ACCESS_KEY_ID=123456 -a my-database-backups
+heroku config:add VCO_BACKUPS_REGION=us-east-1 -a my-database-backups
+heroku config:add VCO_BACKUPS_SECRET_ACCESS_KEY=132345verybigsecret -a my-database-backups
+heroku config:add VCO_BACKUPS_VAULT_NAME=132345verybigsecret -a my-database-backups
 
 ```
-heroku config:add S3_BUCKET_PATH=my-db-backup-bucket/backups -a my-database-backups
-```  
-Be careful when setting the S3_BUCKET_PATH to leave off a trailing forward slash.  Amazon console s3 browser will not be able to locate your file if your directory has "//" (S3 does not really have directories.).
 
 Finally, we need to add heroku scheduler and call [backup.sh](https://github.com/kbaum/heroku-database-backups/blob/master/bin/backup.sh) on a regular interval with the appropriate database and app.
 

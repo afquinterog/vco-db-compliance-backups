@@ -30,6 +30,7 @@ fi
 
 
 if [ "$(date +%u)" = 1 ]; then 
+
 	#install aws-cli
 	curl https://s3.amazonaws.com/aws-cli/awscli-bundle.zip -o awscli-bundle.zip
 	unzip awscli-bundle.zip
@@ -48,7 +49,6 @@ if [ "$(date +%u)" = 1 ]; then
 	echo "-----> Generating backup ... "
 	heroku pg:backups capture $DATABASE --app $APP
 	curl -o $BACKUP_FILE_NAME `heroku pg:backups:url --app $APP`
-
 	FINAL_FILE_NAME=$BACKUP_FILE_NAME
 
 
