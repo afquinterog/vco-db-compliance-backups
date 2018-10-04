@@ -29,7 +29,7 @@ if [[ -z "$VCO_BACKUPS_REGION" ]]; then
 fi
 
 
-if [ "$(date +%u)" = 1 ]; then 
+#if [ "$(date +%u)" = 1 ]; then 
 
 	#install aws-cli
 	curl https://s3.amazonaws.com/aws-cli/awscli-bundle.zip -o awscli-bundle.zip
@@ -64,9 +64,9 @@ if [ "$(date +%u)" = 1 ]; then
 	  --vault-name $VCO_BACKUPS_VAULT_NAME \
 	  --body /tmp/backup.tgz 
 
-else
-	echo "-----> Backups will run once a week .... "	
-fi
+#else
+#	echo "-----> Backups will run once a week .... "	
+#fi
 
 
 
