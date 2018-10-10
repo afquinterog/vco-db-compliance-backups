@@ -35,6 +35,8 @@ heroku config:add VCO_BACKUPS_ACCESS_KEY_ID=123456 -a my-database-backups
 heroku config:add VCO_BACKUPS_REGION=us-east-1 -a my-database-backups
 heroku config:add VCO_BACKUPS_SECRET_ACCESS_KEY=132345verybigsecret -a my-database-backups
 heroku config:add VCO_BACKUPS_VAULT_NAME=my-vault -a my-database-backups
+heroku config:add VCO_BACKUPS_SNS_TOPIC=arn-sns-topic -a my-database-backups
+
 
 ```
 
