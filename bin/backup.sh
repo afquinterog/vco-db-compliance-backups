@@ -33,7 +33,7 @@ if [[ -z "$VCO_BACKUPS_SNS_TOPIC" ]]; then
   exit 1
 fi
 
-#if [ "$(date +%u)" = 1 ]; then 
+if [ "$(date +%u)" = 1 ]; then 
 
 	#install aws-cli
 	curl https://s3.amazonaws.com/aws-cli/awscli-bundle.zip -o awscli-bundle.zip
@@ -71,9 +71,10 @@ fi
 	#notify the sns topic
 	/tmp/aws/bin/aws sns publish --topic-arn "$VCO_BACKUPS_SNS_TOPIC" \
 	 	--message "A new database backup has been generated for the $APP and has been sent to glacier."
-#else
-	#echo "-----> Backups will run once a week .... "	
-#fi
+	 	
+else
+	echo "-----> Backups will run once a week .... "	
+fi
 
 
 
