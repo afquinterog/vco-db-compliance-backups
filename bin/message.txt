@@ -1,0 +1,1 @@
+A new database backup has been generated and has been sent to glacier from heroku.
