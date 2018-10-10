@@ -66,7 +66,7 @@ fi
 
 	#notify the sns topic
 	/tmp/aws/bin/aws sns publish --topic-arn "arn:aws:sns:us-east-1:847662935904:vco-production-backups-topic" \
-	 	--message "A new database backup has been generated and has been sent to glacier from heroku."
+	 	--message "A new database backup has been generated for the $APP and has been sent to glacier from heroku."
 
 #else
 #	echo "-----> Backups will run once a week .... "	
