@@ -28,6 +28,10 @@ if [[ -z "$VCO_BACKUPS_REGION" ]]; then
   exit 1
 fi
 
+if [[ -z "$VCO_BACKUPS_SNS_TOPIC" ]]; then
+  echo "Missing VCO_BACKUPS_SNS_TOPIC variable which must be set to the AWS SNS topic for notifications"
+  exit 1
+fi
 
 #if [ "$(date +%u)" = 1 ]; then 
 
@@ -65,7 +69,7 @@ fi
 	  --body /tmp/backup.tgz 
 
 	#notify the sns topic
-	/tmp/aws/bin/aws sns publish --topic-arn "arn:aws:sns:us-east-1:847662935904:vco-production-backups-topic" \
+	/tmp/aws/bin/aws sns publish --topic-arn "$VCO_BACKUPS_SNS_TOPIC" \
 	 	--message "A new database backup has been generated for the $APP and has been sent to glacier."
 #else
 	#echo "-----> Backups will run once a week .... "	
